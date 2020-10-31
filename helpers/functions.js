@@ -2,7 +2,7 @@ const xlsx = require("sheetjs-style");
 
 const teamName = "Маєш команду? Якщо так, то напиши її назву";
 const fullName = "Прізвище та ім'я ";
-const colmSize = [18, 20, 12, 20, 16, 28, 16, 18, 40];
+const colmSize = [18, 20, 20, 20, 16, 28, 16, 18, 12];
 const sortByTeamName = (array) =>
   [...array].sort((a, b) =>
     a[teamName] < b[teamName]
@@ -43,13 +43,21 @@ const appendAllSheets = (allTeams, wb) => {
   allTeams.map((team) => {
     let sheet = xlsx.utils.json_to_sheet(team);
     sheet["!cols"] = setColmsLen();
+    sheet["!cols"][0] = { hidden: true };
+    sheet["!cols"][6] = { hidden: true };
+    delete sheet["B1"].w;
+    sheet["B1"].v = "ВНЗ";
+    delete sheet["I1"].w;
+    sheet["I1"].v = "Команда";
+    delete sheet["F1"].w;
+    sheet["F1"].v = "Steam";
     xlsx.utils.sheet_add_aoa(sheet, [["Внесок, грн", 0]], {
-      origin: "A10",
+      origin: "B10",
     });
     xlsx.utils.sheet_add_aoa(sheet, [["Порушення", ""]], {
-      origin: "A11",
+      origin: "B11",
     });
-    sheet["A10"].s = {
+    sheet["B10"].s = {
       font: {
         sz: 14,
         color: {
@@ -60,7 +68,7 @@ const appendAllSheets = (allTeams, wb) => {
         fgColor: { rgb: "FFEA4D4D" },
       },
     };
-    sheet["A11"].s = {
+    sheet["B11"].s = {
       font: {
         sz: 14,
         color: {
