@@ -1,8 +1,41 @@
 const xlsx = require("sheetjs-style");
 
-const teamName = "Маєш команду? Якщо так, то напиши її назву";
+const teamName = "Назва команди";
 const fullName = "Прізвище та ім'я ";
-const colmSize = [18, 20, 20, 20, 16, 28, 16, 18, 12];
+const colmSize = [18, 20, 20, 20, 16, 35, 20, 22, 12];
+const headerLettersArr = ["A", "B", "C", "D", "E", "F", "G", "H", "I"];
+const borders = {
+  border: {
+    top: { style: "thin", color: "FF000000" },
+    bottom: { style: "thin", color: "FF000000" },
+    left: { style: "thin", color: "FF000000" },
+    right: { style: "thin", color: "FF000000" },
+  },
+};
+const headerStyle = {
+  font: {
+    sz: 13,
+    color: {
+      rgb: "FF000000",
+    },
+  },
+  fill: {
+    fgColor: { rgb: "FFC9DAF8" },
+  },
+  alignment: {
+    horizontal: "center",
+    vertical: "center",
+  },
+  ...borders,
+};
+const centerClm = {
+  alignment: {
+    horizontal: "center",
+    vertical: "center",
+  },
+  ...borders,
+};
+
 const sortByTeamName = (array) =>
   [...array].sort((a, b) =>
     a[teamName] < b[teamName]
@@ -29,6 +62,26 @@ const setColmsLen = (arrLen = colmSize) => {
   return res;
 };
 
+const deleteColumns = (ws, col, size = 100) => {
+  for (let i = 1; i < size; i++) {
+    if (ws[`${col}${i}`] == undefined) break;
+    ws[`${col}${i}`].v = "";
+  }
+};
+
+const changeClmnName = (ws, cl, newName = "") => {
+  delete ws[`${cl}`].w;
+  ws[`${cl}`].v = newName;
+};
+const addStyleToColm = (ws, colArr, style, size = 100) => {
+  colArr.map((col) => {
+    for (let i = 1; i <= size; i++) {
+      if (ws[`${col}${i}`] == undefined) break;
+      ws[`${col}${i}`].s = style;
+    }
+  });
+};
+
 const getAllTeams = (array) => {
   const teamsNames = getTeamsNames(array);
   const allTeams = [];
@@ -45,30 +98,28 @@ const appendAllSheets = (allTeams, wb) => {
     sheet["!cols"] = setColmsLen();
     sheet["!cols"][0] = { hidden: true };
     sheet["!cols"][6] = { hidden: true };
-    delete sheet["B1"].w;
-    sheet["B1"].v = "ВНЗ";
-    delete sheet["I1"].w;
-    sheet["I1"].v = "Команда";
-    delete sheet["F1"].w;
-    sheet["F1"].v = "Steam";
-    xlsx.utils.sheet_add_aoa(sheet, [["Внесок, грн", 0]], {
-      origin: "B10",
-    });
-    xlsx.utils.sheet_add_aoa(sheet, [["Порушення", ""]], {
-      origin: "B11",
-    });
-    sheet["B10"].s = {
-      font: {
-        sz: 14,
-        color: {
-          rgb: "FF000000",
-        },
-      },
+
+    deleteColumns(sheet, "I", 10);
+
+    addStyleToColm(sheet, headerLettersArr, borders);
+    addStyleToColm(sheet, ["C", "D", "E", "H"], centerClm);
+    addStyleToColm(sheet, headerLettersArr, headerStyle, 1);
+
+    sheet["!cols"][8] = { wch: 20 };
+    sheet["I1"].v = "Порушення";
+    sheet["I1"].s = {
+      ...headerStyle,
       fill: {
-        fgColor: { rgb: "FFEA4D4D" },
+        fgColor: { rgb: "FFF7FF05" },
       },
     };
-    sheet["B11"].s = {
+    xlsx.utils.sheet_add_aoa(sheet, [["Статус команди", ""]], {
+      origin: "B11",
+    });
+    xlsx.utils.sheet_add_aoa(sheet, [["Внесок, грн", 0]], {
+      origin: "B12",
+    });
+    sheet["C11"].s = {
       font: {
         sz: 14,
         color: {
@@ -78,31 +129,26 @@ const appendAllSheets = (allTeams, wb) => {
       fill: {
         fgColor: { rgb: "FFFFFF00" },
       },
+      ...borders,
     };
-    colorSheetRows(sheet, ["A", "B", "C", "D", "E", "F", "G", "H", "I"]);
-    xlsx.utils.book_append_sheet(
-      wb,
-      sheet,
-      team[0]["Маєш команду? Якщо так, то напиши її назву"]
-    );
+    sheet["C12"].s = {
+      font: {
+        sz: 14,
+        color: {
+          rgb: "FF000000",
+        },
+      },
+      fill: {
+        fgColor: { rgb: "FFEA4D4D" },
+      },
+      ...borders,
+    };
+    sheet["B11"].s = borders;
+    sheet["B12"].s = borders;
+
+    xlsx.utils.book_append_sheet(wb, sheet, team[0]["Назва команди"]);
   });
 };
-
-const colorSheetRows = (sheet, array) =>
-  array.forEach(
-    (l) =>
-      (sheet[l + "1"].s = {
-        font: {
-          sz: 13,
-          color: {
-            rgb: "FF000000",
-          },
-        },
-        fill: {
-          fgColor: { rgb: "FFC9DAF8" },
-        },
-      })
-  );
 
 module.exports = {
   sortByTeamName,

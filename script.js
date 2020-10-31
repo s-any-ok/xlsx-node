@@ -22,7 +22,7 @@ appendAllSheets(allTeams, newWB);
 
 xlsx.writeFile(newWB, "tables/Members Table CSGO.xlsx");
 const teams = getTeamsNames(jsonData);
-console.log(allTeams);
+console.dir(teams);
 
 // const newWS1 = xlsx.utils.json_to_sheet(team1);
 // newWS1["!cols"] = setColmsLen();
